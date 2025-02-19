@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Backoff Exponencial</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input, button { margin: 5px; padding: 8px; }
+        table { margin: auto; border-collapse: collapse; width: 50%; }
+        th, td { border: 1px solid black; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Calculadora de Backoff Exponencial</h2>
+
+    <form id="backoffForm">
+        <label>Data da primeira execução:</label>
+        <input type="datetime-local" id="startTime" required><br>
+
+        <label>Max Attempts:</label>
+        <input type="number" id="maxAttempt" value="5"><br>
+
+        <label>Backoff Seconds:</label>
+        <input type="number" id="backoffSeconds" value="18000"><br>
+
+        <label>Backoff Factor:</label>
+        <input type="number" id="backoffFactor" value="2"><br>
+
+        <label>Jitter Min (segundos):</label>
+        <input type="number" id="jitterMin" value="0"><br>
+
+        <label>Jitter Max (segundos):</label>
+        <input type="number" id="jitterMax" value="300"><br>
+
+        <button type="button" onclick="calculateBackoff()">Calcular</button>
+    </form>
+
+    <h3>Resultados:</h3>
+    <table id="resultTable">
+        <tr>
+            <th>#</th>
+            <th>Data e Hora</th>
+        </tr>
+    </table>
+
+    <script>
+        function calculateBackoff() {
+            let startTime = new Date(document.getElementById("startTime").value);
+            let maxAttempt = parseInt(document.getElementById("maxAttempt").value);
+            let backoffSeconds = parseInt(document.getElementById("backoffSeconds").value);
+            let backoffFactor = parseFloat(document.getElementById("backoffFactor").value);
+            let jitterMin = parseInt(document.getElementById("jitterMin").value);
+            let jitterMax = parseInt(document.getElementById("jitterMax").value);
+
+            let results = document.getElementById("resultTable");
+            results.innerHTML = "<tr><th>#</th><th>Data e Hora</th></tr>";
+
+            for (let attempt = 1; attempt <= maxAttempt; attempt++) {
+                let waitTime = backoffSeconds * Math.pow(backoffFactor, attempt - 1);
+                let jitter = Math.random() * (jitterMax - jitterMin) + jitterMin;
+                let totalWaitTime = waitTime + jitter;
+
+                startTime = new Date(startTime.getTime() + totalWaitTime * 1000);
+
+                let row = results.insertRow();
+                row.insertCell(0).innerText = attempt;
+                row.insertCell(1).innerText = startTime.toLocaleString();
+            }
+        }
+    </script>
+</body>
+</html>
